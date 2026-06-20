@@ -45,6 +45,29 @@ export interface OpponentAnalyzeRequest {
   conversationHistory: string; // 분석할 대화 히스토리
 }
 
+// ─── 대화 시뮬레이션 ────────────────────────────────────────
+
+export interface SimulateRequest {
+  conversationHistory: string;
+  selectedMessage: string;         // 선택한 톤별 메시지
+  opponentContext?: OpponentAnalyzeResponse;
+}
+
+export interface SimulatedTurn {
+  speaker: "me" | "opponent";
+  message: string;
+  emotion?: string;  // 상대방 감정 추정
+  tip?: string;      // 이 시점의 대응 힌트
+}
+
+export interface SimulateResponse {
+  turns: SimulatedTurn[];
+  outcome: "positive" | "neutral" | "negative";
+  outcomeLabel: string;    // "관계 개선", "현상 유지", "갈등 심화"
+  outcomeSummary: string;  // 결과 요약
+  riskDelta: number;       // 위험도 변화 -100~+100 (음수=호전, 양수=악화)
+}
+
 export type CommunicationStyle =
   | "assertive"    // 주도적/직접적
   | "aggressive"   // 공격적

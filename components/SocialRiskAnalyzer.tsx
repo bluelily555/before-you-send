@@ -245,7 +245,7 @@ export default function SocialRiskAnalyzer() {
                   )}
                 </div>
               )}
-              {result && <AnalysisResult result={result} onSelectMessage={setMessageToSend} />}
+              {result && <AnalysisResult result={result} onSelectMessage={setMessageToSend} conversationHistory={conversationHistory} opponentContext={oppResult ?? undefined} />}
             </div>
           </div>
         )}

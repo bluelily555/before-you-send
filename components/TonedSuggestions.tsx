@@ -1,11 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { TonedSuggestion } from "@/types";
+import { TonedSuggestion, OpponentAnalyzeResponse } from "@/types";
+import ConversationSimulation from "./ConversationSimulation";
 
 interface TonedSuggestionsProps {
   suggestions: TonedSuggestion[];
   onSelect: (message: string) => void;
+  conversationHistory?: string;
+  opponentContext?: OpponentAnalyzeResponse;
 }
 
 const toneStyles = {
@@ -51,8 +54,11 @@ function RiskBadge({ score }: { score: number }) {
 export default function TonedSuggestions({
   suggestions,
   onSelect,
+  conversationHistory = "",
+  opponentContext,
 }: TonedSuggestionsProps) {
   const [copied, setCopied] = useState<string | null>(null);
+  const [simulating, setSimulating] = useState<TonedSuggestion | null>(null);
 
   const handleCopy = async (tone: string, message: string) => {
     await navigator.clipboard.writeText(message);
@@ -79,9 +85,7 @@ export default function TonedSuggestions({
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
                   <span className="text-xl">{s.emoji}</span>
-                  <span
-                    className={`text-xs font-bold px-2 py-1 rounded-full ${style.badge}`}
-                  >
+                  <span className={`text-xs font-bold px-2 py-1 rounded-full ${style.badge}`}>
                     {s.label}
                   </span>
                 </div>
@@ -93,17 +97,13 @@ export default function TonedSuggestions({
                 &ldquo;{s.message}&rdquo;
               </p>
 
-              {/* 버튼 2개 */}
+              {/* 버튼 3개 */}
               <div className="flex gap-2">
                 <button
                   onClick={() => handleCopy(s.tone, s.message)}
                   className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${style.button} flex items-center justify-center gap-1`}
                 >
-                  {isCopied ? (
-                    <><span>✅</span> 복사됨!</>
-                  ) : (
-                    <><span>📋</span> 복사하기</>
-                  )}
+                  {isCopied ? <><span>✅</span> 복사됨!</> : <><span>📋</span> 복사하기</>}
                 </button>
                 <button
                   onClick={() => onSelect(s.message)}
@@ -111,11 +111,29 @@ export default function TonedSuggestions({
                 >
                   <span>✍️</span> 입력창에 적용
                 </button>
+                <button
+                  onClick={() => setSimulating(s)}
+                  className="flex-1 py-2 text-xs font-bold rounded-lg border-2 border-purple-300 text-purple-700 hover:bg-purple-50 transition-all flex items-center justify-center gap-1"
+                >
+                  <span>🎭</span> 시뮬레이션
+                </button>
               </div>
             </div>
           );
         })}
       </div>
+
+      {/* 시뮬레이션 모달 */}
+      {simulating && (
+        <ConversationSimulation
+          toneLabel={simulating.label}
+          toneEmoji={simulating.emoji}
+          selectedMessage={simulating.message}
+          conversationHistory={conversationHistory}
+          opponentContext={opponentContext}
+          onClose={() => setSimulating(null)}
+        />
+      )}
     </div>
   );
 }
