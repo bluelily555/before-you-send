@@ -6,7 +6,8 @@ export interface Message {
 export interface AnalyzeRequest {
   conversationHistory: string;
   messageToSend: string;
-  opponentContext?: OpponentAnalyzeResponse; // 상대방 분석 결과 (사전 분석 시 주입)
+  opponentContext?: OpponentAnalyzeResponse;
+  model?: string;
 }
 
 export interface RiskLevel {
@@ -42,7 +43,8 @@ export interface AnalyzeResponse {
 // ─── 상대방 분석 ───────────────────────────────────────────
 
 export interface OpponentAnalyzeRequest {
-  conversationHistory: string; // 분석할 대화 히스토리
+  conversationHistory: string;
+  model?: string;
 }
 
 // ─── 대화 시뮬레이션 ────────────────────────────────────────

@@ -56,8 +56,9 @@ export async function analyzeOpponent(
 [대화 히스토리]
 ${request.conversationHistory}`;
 
+  const selectedModel = request.model || "gpt-4o-mini";
   const body = JSON.stringify({
-    model: "gpt-4o-mini",
+    model: selectedModel,
     messages: [
       { role: "system", content: SYSTEM_PROMPT },
       { role: "user", content: userContent },

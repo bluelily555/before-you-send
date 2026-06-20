@@ -147,12 +147,13 @@ ${request.messageToSend}
 ${request.opponentContext ? "특히 상대방의 소통 방식과 감정 상태를 고려해 각 톤별 메시지를 최적화해주세요." : ""}`;
 
   // 1순위: GitHub Models API (Copilot SDK 호환)
+  const selectedModel = request.model || "gpt-4o-mini";
   if (githubToken) {
     try {
       return await callOpenAICompatible(
         "https://models.inference.ai.azure.com",
         githubToken,
-        "gpt-4o-mini",
+        selectedModel,
         SYSTEM_PROMPT,
         userContent
       );

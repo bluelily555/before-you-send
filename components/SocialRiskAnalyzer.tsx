@@ -12,6 +12,15 @@ export default function SocialRiskAnalyzer() {
   const searchParams = useSearchParams();
   const [activeTab, setActiveTab] = useState<Tab>("risk");
 
+  // 모델 선택 상태
+  const MODELS = [
+    { id: "gpt-4o-mini",                    label: "GPT-4o mini",        limit: "200회/일" },
+    { id: "gpt-4o",                         label: "GPT-4o",             limit: "50회/일" },
+    { id: "meta-llama-3.1-70b-instruct",    label: "Llama 3.1 70B",      limit: "무제한에 가까움" },
+    { id: "meta-llama-3.1-8b-instruct",     label: "Llama 3.1 8B",       limit: "무제한에 가까움" },
+  ];
+  const [selectedModel, setSelectedModel] = useState(MODELS[0].id);
+
   // 위험도 분석 상태
   const [conversationHistory, setConversationHistory] = useState("");
   const [messageToSend, setMessageToSend] = useState("");
@@ -71,9 +80,7 @@ export default function SocialRiskAnalyzer() {
         const oppRes = await fetch("/api/analyze-opponent", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ conversationHistory: history }),
-        });
-        if (oppRes.ok) {
+          body: JSON.stringify({ conversationHistory: history, model: selectedModel }),
           opponentCtx = await oppRes.json();
           setOppHistory(history);
           setOppResult(opponentCtx ?? null);
@@ -89,7 +96,7 @@ export default function SocialRiskAnalyzer() {
       const res = await fetch("/api/analyze", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ conversationHistory: history, messageToSend: message, opponentContext: opponentCtx }),
+        body: JSON.stringify({ conversationHistory: history, messageToSend: message, opponentContext: opponentCtx, model: selectedModel }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "분석 실패");
@@ -109,7 +116,7 @@ export default function SocialRiskAnalyzer() {
       const res = await fetch("/api/analyze-opponent", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ conversationHistory: history }),
+        body: JSON.stringify({ conversationHistory: history, model: selectedModel }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "분석 실패");
@@ -139,6 +146,16 @@ export default function SocialRiskAnalyzer() {
             <p className="text-xs text-gray-500">Before You Send · Powered by GitHub Copilot SDK + Azure AI</p>
           </div>
           <div className="ml-auto flex items-center gap-2">
+            <select
+              value={selectedModel}
+              onChange={(e) => setSelectedModel(e.target.value)}
+              className="text-xs border border-gray-200 rounded-full px-3 py-1 bg-white text-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-300 cursor-pointer"
+              title="AI 모델 선택"
+            >
+              {MODELS.map(m => (
+                <option key={m.id} value={m.id}>{m.label} ({m.limit})</option>
+              ))}
+            </select>
             <span className="text-xs bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full font-medium">Copilot SDK</span>
             <span className="text-xs bg-blue-100 text-blue-700 px-3 py-1 rounded-full font-medium">Azure AI</span>
             <span className="text-xs bg-green-100 text-green-700 px-3 py-1 rounded-full font-medium">Extension API</span>
