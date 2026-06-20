@@ -1,6 +1,6 @@
 "use client";
 
-import { AnalyzeResponse } from "@/types";
+import { AnalyzeResponse, OpponentAnalyzeResponse } from "@/types";
 import RiskMeter from "./RiskMeter";
 import CategoryCard from "./CategoryCard";
 import TonedSuggestions from "./TonedSuggestions";
@@ -8,9 +8,11 @@ import TonedSuggestions from "./TonedSuggestions";
 interface AnalysisResultProps {
   result: AnalyzeResponse;
   onSelectMessage?: (message: string) => void;
+  conversationHistory?: string;
+  opponentContext?: OpponentAnalyzeResponse;
 }
 
-export default function AnalysisResult({ result, onSelectMessage }: AnalysisResultProps) {
+export default function AnalysisResult({ result, onSelectMessage, conversationHistory, opponentContext }: AnalysisResultProps) {
   return (
     <div className="space-y-6 animate-fadeIn">
       {/* 종합 위험도 */}
@@ -59,6 +61,8 @@ export default function AnalysisResult({ result, onSelectMessage }: AnalysisResu
           <TonedSuggestions
             suggestions={result.tonedSuggestions}
             onSelect={onSelectMessage ?? (() => {})}
+            conversationHistory={conversationHistory}
+            opponentContext={opponentContext}
           />
         </div>
       )}
