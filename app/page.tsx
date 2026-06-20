@@ -1,6 +1,9 @@
 import { Suspense } from "react";
 import SocialRiskAnalyzer from "@/components/SocialRiskAnalyzer";
 
+// useSearchParams 사용으로 인해 동적 렌더링 강제
+export const dynamic = "force-dynamic";
+
 export default function Home() {
   return (
     <Suspense fallback={
