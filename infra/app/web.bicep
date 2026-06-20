@@ -47,6 +47,7 @@ resource appService 'Microsoft.Web/sites@2022-09-01' = {
         { name: 'NEXT_TELEMETRY_DISABLED',   value: '1' }
         { name: 'WEBSITE_NODE_DEFAULT_VERSION', value: '~20' }
         { name: 'SCM_DO_BUILD_DURING_DEPLOYMENT', value: 'true' }
+        { name: 'ENABLE_ORYX_BUILD',              value: 'true' }
         { name: 'PORT', value: '8080' }
       ]
     }
