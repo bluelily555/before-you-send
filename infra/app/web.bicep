@@ -34,7 +34,7 @@ resource appService 'Microsoft.Web/sites@2022-09-01' = {
     httpsOnly: true
     siteConfig: {
       linuxFxVersion: 'NODE|20-lts'
-      appCommandLine: 'npm start'
+      appCommandLine: 'node server.js'
       nodeVersion: '~20'
       ftpsState: 'Disabled'
       minTlsVersion: '1.2'
@@ -47,7 +47,7 @@ resource appService 'Microsoft.Web/sites@2022-09-01' = {
         { name: 'NEXT_TELEMETRY_DISABLED',   value: '1' }
         { name: 'WEBSITE_NODE_DEFAULT_VERSION', value: '~20' }
         { name: 'SCM_DO_BUILD_DURING_DEPLOYMENT', value: 'false' }
-        { name: 'WEBSITE_RUN_FROM_PACKAGE', value: '1' }
+        { name: 'PORT', value: '8080' }
       ]
     }
   }
