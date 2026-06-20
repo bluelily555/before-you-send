@@ -34,7 +34,7 @@ resource appService 'Microsoft.Web/sites@2022-09-01' = {
     httpsOnly: true
     siteConfig: {
       linuxFxVersion: 'NODE|20-lts'
-      appCommandLine: 'node server.js'
+      appCommandLine: 'npm start'
       nodeVersion: '~20'
       ftpsState: 'Disabled'
       minTlsVersion: '1.2'
@@ -46,7 +46,7 @@ resource appService 'Microsoft.Web/sites@2022-09-01' = {
         { name: 'AZURE_OPENAI_DEPLOYMENT',   value: azureOpenAiDeployment }
         { name: 'NEXT_TELEMETRY_DISABLED',   value: '1' }
         { name: 'WEBSITE_NODE_DEFAULT_VERSION', value: '~20' }
-        { name: 'SCM_DO_BUILD_DURING_DEPLOYMENT', value: 'false' }
+        { name: 'SCM_DO_BUILD_DURING_DEPLOYMENT', value: 'true' }
         { name: 'PORT', value: '8080' }
       ]
     }

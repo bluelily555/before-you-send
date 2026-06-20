@@ -9,4 +9,3 @@ services:
     project: .
     language: js
     host: appservice
-    dist: .next/standalone
