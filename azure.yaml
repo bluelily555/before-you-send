@@ -9,7 +9,3 @@ services:
     project: .
     language: js
     host: appservice
-    hooks:
-      prebuild:
-        shell: sh
-        run: export NODE_OPTIONS="--max-old-space-size=1536"
