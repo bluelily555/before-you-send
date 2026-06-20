@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "NODE_ENV=production next build",
     "postbuild": "node -e \"const fs=require('fs');const path=require('path');if(fs.existsSync('.next/standalone')){fs.cpSync('public','.next/standalone/public',{recursive:true});fs.cpSync('.next/static','.next/standalone/.next/static',{recursive:true});console.log('Static files copied to standalone');}\"",
     "start": "node .next/standalone/server.js",
     "lint": "eslint"
