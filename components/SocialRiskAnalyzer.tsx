@@ -81,6 +81,8 @@ export default function SocialRiskAnalyzer() {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ conversationHistory: history, model: selectedModel }),
+        });
+        if (oppRes.ok) {
           opponentCtx = await oppRes.json();
           setOppHistory(history);
           setOppResult(opponentCtx ?? null);
