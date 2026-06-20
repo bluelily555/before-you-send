@@ -26,25 +26,46 @@ const severityLabel: Record<PatternTag["severity"], string> = {
 
 function PowerBar({ score }: { score: number }) {
   const clamped = Math.max(-100, Math.min(100, score));
-  const pct = (clamped + 100) / 2; // 0~100%
-  const color = clamped < -20 ? "bg-red-400" : clamped > 20 ? "bg-green-400" : "bg-yellow-400";
+  const halfPct = Math.abs(clamped) / 2; // 최대 50%
   const label = clamped < -30 ? "상대방 주도" : clamped > 30 ? "내가 주도" : "균형";
+  const labelColor = clamped < -30 ? "text-red-600" : clamped > 30 ? "text-green-600" : "text-yellow-600";
 
   return (
     <div>
-      <div className="flex justify-between text-xs text-gray-500 mb-1">
-        <span>상대방 주도 ◀</span>
-        <span className="font-bold">{label}</span>
-        <span>▶ 내가 주도</span>
+      <div className="flex justify-between text-xs text-gray-500 mb-2">
+        <span className="font-medium text-red-500">◀ 상대방 주도</span>
+        <span className={`font-black text-sm ${labelColor}`}>{label}</span>
+        <span className="font-medium text-green-500">내가 주도 ▶</span>
       </div>
-      <div className="relative w-full bg-gray-200 rounded-full h-3">
-        <div className="absolute left-1/2 top-0 w-0.5 h-3 bg-gray-400 z-10" />
-        <div
-          className={`h-3 rounded-full ${color} transition-all duration-700`}
-          style={{ width: `${pct}%` }}
-        />
+
+      {/* 양방향 바 */}
+      <div className="relative w-full bg-gray-100 rounded-full h-5 overflow-hidden">
+        {/* 음수: 중앙에서 왼쪽으로 */}
+        {clamped < 0 && (
+          <div
+            className="absolute top-0 h-5 bg-red-400 transition-all duration-700 ease-out"
+            style={{ right: "50%", width: `${halfPct}%` }}
+          />
+        )}
+        {/* 양수: 중앙에서 오른쪽으로 */}
+        {clamped > 0 && (
+          <div
+            className="absolute top-0 h-5 bg-green-400 transition-all duration-700 ease-out"
+            style={{ left: "50%", width: `${halfPct}%` }}
+          />
+        )}
+        {/* 중앙 기준선 */}
+        <div className="absolute left-1/2 top-0 w-0.5 h-5 bg-gray-400 z-10 -translate-x-1/2" />
       </div>
-      <p className="text-xs text-gray-500 mt-1">{score > 0 ? `+${score}` : score} / 100</p>
+
+      {/* 눈금 */}
+      <div className="flex justify-between text-xs text-gray-400 mt-1 px-0.5">
+        <span>-100</span>
+        <span>-50</span>
+        <span className={`font-black ${labelColor}`}>{clamped > 0 ? `+${clamped}` : clamped}</span>
+        <span>+50</span>
+        <span>+100</span>
+      </div>
     </div>
   );
 }

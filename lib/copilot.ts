@@ -93,14 +93,33 @@ export async function analyzeWithCopilot(
   request: AnalyzeRequest,
   githubToken?: string
 ): Promise<AnalyzeResponse> {
+
+  // 상대방 분석 컨텍스트 문자열 생성
+  const opponentSection = request.opponentContext
+    ? `
+[사전 상대방 분석 결과 - 이 정보를 반드시 위험도 평가에 반영하세요]
+- 소통 방식: ${request.opponentContext.communicationStyle.label}형 (강도 ${request.opponentContext.communicationStyle.score}/100)
+  설명: ${request.opponentContext.communicationStyle.description}
+- 감정 상태: ${request.opponentContext.emotionalState.label} ${request.opponentContext.emotionalState.description}
+- 대화 주도권: ${request.opponentContext.powerDynamics.label} (점수 ${request.opponentContext.powerDynamics.score})
+  설명: ${request.opponentContext.powerDynamics.description}
+- 감지된 패턴: ${request.opponentContext.patternTags.map(p => `${p.tag}(${p.severity})`).join(", ")}
+- 경고 신호: ${request.opponentContext.warningSignals.join(" / ")}
+- 종합 분석: ${request.opponentContext.overallSummary}
+
+→ 상대방이 ${request.opponentContext.communicationStyle.label}형이고 ${request.opponentContext.emotionalState.label} 상태임을 고려하여,
+  아래 메시지가 상대방에게 어떤 반응을 유발할지 구체적으로 분석하고 위험도에 반영하세요.`
+    : "";
+
   const userContent = `
 [대화 히스토리]
 ${request.conversationHistory || "(없음)"}
-
+${opponentSection}
 [보내려는 메시지]
 ${request.messageToSend}
 
-위 메시지의 사회생활 위험도를 분석하고, 3가지 톤(정중한/친근한/유머러스한)으로 안전한 대안 메시지도 제공해주세요.`;
+위 메시지의 사회생활 위험도를 분석하고, 3가지 톤(정중한/친근한/유머러스한)으로 안전한 대안 메시지도 제공해주세요.
+${request.opponentContext ? "특히 상대방의 소통 방식과 감정 상태를 고려해 각 톤별 메시지를 최적화해주세요." : ""}`;
 
   // 1순위: GitHub Models API (Copilot SDK 호환)
   if (githubToken) {

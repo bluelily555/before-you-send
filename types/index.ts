@@ -6,6 +6,7 @@ export interface Message {
 export interface AnalyzeRequest {
   conversationHistory: string;
   messageToSend: string;
+  opponentContext?: OpponentAnalyzeResponse; // 상대방 분석 결과 (사전 분석 시 주입)
 }
 
 export interface RiskLevel {

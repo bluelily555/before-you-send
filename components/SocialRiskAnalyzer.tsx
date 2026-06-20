@@ -17,6 +17,7 @@ export default function SocialRiskAnalyzer() {
   const [messageToSend, setMessageToSend] = useState("");
   const [result, setResult] = useState<AnalyzeResponse | null>(null);
   const [loading, setLoading] = useState(false);
+  const [loadingStep, setLoadingStep] = useState<"opponent" | "risk" | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   // 상대방 분석 상태
@@ -31,11 +32,28 @@ export default function SocialRiskAnalyzer() {
     const history = searchParams.get("history") ?? "";
     const message = searchParams.get("message") ?? "";
     const autorun = searchParams.get("autorun") === "1";
+    const tab = searchParams.get("tab") as Tab | null;
+    const oppHistoryParam = searchParams.get("opp") ?? "";
+
+    // 탭 전환
+    if (tab === "opponent" || tab === "risk") setActiveTab(tab);
+
+    // 위험도 탭 자동입력
     if (history) setConversationHistory(decodeURIComponent(history));
     if (message) setMessageToSend(decodeURIComponent(message));
     if (autorun && message && !autoRunFired.current) {
       autoRunFired.current = true;
       runRiskAnalysis(decodeURIComponent(history), decodeURIComponent(message));
+    }
+
+    // 상대방 분석 탭 자동입력 & 자동실행
+    if (oppHistoryParam) {
+      const decoded = decodeURIComponent(oppHistoryParam);
+      setOppHistory(decoded);
+      if (autorun && !autoRunFired.current) {
+        autoRunFired.current = true;
+        setTimeout(() => runOpponentAnalysisWith(decoded), 100);
+      }
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
@@ -43,11 +61,35 @@ export default function SocialRiskAnalyzer() {
   const runRiskAnalysis = async (history: string, message: string) => {
     if (!message.trim()) return;
     setLoading(true); setError(null); setResult(null);
+
+    let opponentCtx: OpponentAnalyzeResponse | undefined;
+
+    // 1단계: 대화 히스토리가 있으면 상대방 분석 먼저 수행
+    if (history.trim()) {
+      setLoadingStep("opponent");
+      try {
+        const oppRes = await fetch("/api/analyze-opponent", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ conversationHistory: history }),
+        });
+        if (oppRes.ok) {
+          opponentCtx = await oppRes.json();
+          setOppHistory(history);
+          setOppResult(opponentCtx ?? null);
+        }
+      } catch {
+        // 상대방 분석 실패해도 위험도 분석은 계속 진행
+      }
+    }
+
+    // 2단계: 상대방 분석 결과를 반영해 위험도 분석
+    setLoadingStep("risk");
     try {
       const res = await fetch("/api/analyze", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ conversationHistory: history, messageToSend: message }),
+        body: JSON.stringify({ conversationHistory: history, messageToSend: message, opponentContext: opponentCtx }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "분석 실패");
@@ -56,17 +98,18 @@ export default function SocialRiskAnalyzer() {
       setError(e instanceof Error ? e.message : "오류가 발생했습니다.");
     } finally {
       setLoading(false);
+      setLoadingStep(null);
     }
   };
 
-  const runOpponentAnalysis = async () => {
-    if (!oppHistory.trim()) { setOppError("대화 히스토리를 입력해주세요."); return; }
+  const runOpponentAnalysisWith = async (history: string) => {
+    if (!history.trim()) return;
     setOppLoading(true); setOppError(null); setOppResult(null);
     try {
       const res = await fetch("/api/analyze-opponent", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ conversationHistory: oppHistory }),
+        body: JSON.stringify({ conversationHistory: history }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "분석 실패");
@@ -77,6 +120,8 @@ export default function SocialRiskAnalyzer() {
       setOppLoading(false);
     }
   };
+
+  const runOpponentAnalysis = () => runOpponentAnalysisWith(oppHistory);
 
   const tabs: { id: Tab; label: string; emoji: string; desc: string }[] = [
     { id: "risk",     label: "메시지 위험도",  emoji: "🛡️", desc: "보내기 전 위험도 분석" },
@@ -163,6 +208,7 @@ export default function SocialRiskAnalyzer() {
                   <><svg className="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/></svg>분석 중...</>
                 ) : (<><span>🔍</span>사회생활 위험도 분석</>)}
               </button>
+
               {error && <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-red-700 text-sm">⚠️ {error}</div>}
             </div>
             <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 min-h-[400px]">
@@ -176,7 +222,27 @@ export default function SocialRiskAnalyzer() {
               {loading && (
                 <div className="flex flex-col items-center justify-center h-64 text-indigo-400">
                   <div className="text-5xl mb-4 animate-bounce">🤖</div>
-                  <p className="text-sm text-center">AI가 분석 중...<br/><span className="text-xs text-gray-400">Copilot SDK 처리 중</span></p>
+                  {loadingStep === "opponent" ? (
+                    <>
+                      <p className="text-sm font-bold text-purple-600">1단계: 상대방 분석 중...</p>
+                      <p className="text-xs text-gray-400 mt-1">대화 패턴과 소통 방식 파악 중</p>
+                      <div className="flex items-center gap-2 mt-3">
+                        <span className="text-xs bg-purple-100 text-purple-600 px-2 py-0.5 rounded-full animate-pulse">상대방 분석</span>
+                        <span className="text-xs text-gray-300">→</span>
+                        <span className="text-xs bg-gray-100 text-gray-400 px-2 py-0.5 rounded-full">위험도 분석</span>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <p className="text-sm font-bold text-indigo-600">2단계: 위험도 분석 중...</p>
+                      <p className="text-xs text-gray-400 mt-1">상대방 분석 결과를 반영해 평가 중</p>
+                      <div className="flex items-center gap-2 mt-3">
+                        <span className="text-xs bg-purple-100 text-purple-600 px-2 py-0.5 rounded-full">✓ 상대방 분석</span>
+                        <span className="text-xs text-gray-400">→</span>
+                        <span className="text-xs bg-indigo-100 text-indigo-600 px-2 py-0.5 rounded-full animate-pulse">위험도 분석</span>
+                      </div>
+                    </>
+                  )}
                 </div>
               )}
               {result && <AnalysisResult result={result} onSelectMessage={setMessageToSend} />}
