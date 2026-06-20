@@ -141,6 +141,7 @@ export default function SocialRiskAnalyzer() {
           <div className="ml-auto flex items-center gap-2">
             <span className="text-xs bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full font-medium">Copilot SDK</span>
             <span className="text-xs bg-blue-100 text-blue-700 px-3 py-1 rounded-full font-medium">Azure AI</span>
+            <span className="text-xs bg-green-100 text-green-700 px-3 py-1 rounded-full font-medium">Extension API</span>
           </div>
         </div>
       </header>
