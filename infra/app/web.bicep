@@ -44,7 +44,6 @@ resource appService 'Microsoft.Web/sites@2022-09-01' = {
         { name: 'AZURE_OPENAI_ENDPOINT',     value: azureOpenAiEndpoint }
         { name: 'AZURE_OPENAI_API_KEY',      value: azureOpenAiApiKey }
         { name: 'AZURE_OPENAI_DEPLOYMENT',   value: azureOpenAiDeployment }
-        { name: 'NODE_ENV',                  value: 'production' }
         { name: 'NEXT_TELEMETRY_DISABLED',   value: '1' }
         { name: 'WEBSITE_NODE_DEFAULT_VERSION', value: '~20' }
         { name: 'SCM_DO_BUILD_DURING_DEPLOYMENT', value: 'true' }
