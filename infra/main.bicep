@@ -1,4 +1,4 @@
-targetScope = 'subscription'
+targetScope = 'resourceGroup'
 
 @minLength(1)
 @maxLength(64)
@@ -7,7 +7,7 @@ param environmentName string
 
 @minLength(1)
 @description('Azure 배포 리전')
-param location string
+param location string = resourceGroup().location
 
 @description('GitHub Models API 토큰')
 @secure()
@@ -24,20 +24,12 @@ param azureOpenAiApiKey string = ''
 param azureOpenAiDeployment string = 'gpt-4o'
 
 var tags = { 'azd-env-name': environmentName }
-var resourceToken = toLower(uniqueString(subscription().id, environmentName, location))
+var resourceToken = toLower(uniqueString(resourceGroup().id, environmentName))
 var appName = 'bys-${resourceToken}'
 
-// 리소스 그룹
-resource rg 'Microsoft.Resources/resourceGroups@2021-04-01' = {
-  name: 'rg-${environmentName}'
-  location: location
-  tags: tags
-}
-
-// App Service 배포
+// App Service 배포 (기존 리소스 그룹 사용)
 module web 'app/web.bicep' = {
   name: 'web'
-  scope: rg
   params: {
     name: appName
     location: location
@@ -51,6 +43,5 @@ module web 'app/web.bicep' = {
 
 // azd 출력값
 output AZURE_LOCATION string = location
-output AZURE_RESOURCE_GROUP string = rg.name
 output SERVICE_WEB_URL string = web.outputs.url
 output SERVICE_WEB_NAME string = web.outputs.name
