@@ -25,8 +25,34 @@ const SYSTEM_PROMPT = `당신은 사회생활 소통 전문가 AI입니다.
   ],
   "summary": "전체 위험 분석 요약",
   "suggestions": ["개선 제안1", "개선 제안2"],
-  "revisedMessage": "더 안전하게 수정된 메시지 (위험할 경우에만)"
-}`;
+  "revisedMessage": "더 안전하게 수정된 메시지 (위험할 경우에만)",
+  "tonedSuggestions": [
+    {
+      "tone": "formal",
+      "label": "정중한",
+      "emoji": "💼",
+      "message": "격식체로 정중하고 전문적으로 재작성한 메시지",
+      "riskScore": 0-100
+    },
+    {
+      "tone": "friendly",
+      "label": "친근한",
+      "emoji": "😊",
+      "message": "부드럽고 친근하게 재작성한 메시지",
+      "riskScore": 0-100
+    },
+    {
+      "tone": "humorous",
+      "label": "유머러스한",
+      "emoji": "😄",
+      "message": "가볍고 유머러스하게 재작성한 메시지 (관계를 풀어주는 톤)",
+      "riskScore": 0-100
+    }
+  ]
+}
+
+tonedSuggestions는 원본 메시지의 핵심 의도를 살리되, 각 톤에 맞게 안전하게 재작성해야 합니다.
+원본이 이미 안전(score 30 이하)해도 반드시 3가지 톤 버전을 제공하세요.`;
 
 async function callOpenAICompatible(
   endpoint: string,
@@ -74,9 +100,9 @@ ${request.conversationHistory || "(없음)"}
 [보내려는 메시지]
 ${request.messageToSend}
 
-위 메시지의 사회생활 위험도를 분석해주세요.`;
+위 메시지의 사회생활 위험도를 분석하고, 3가지 톤(정중한/친근한/유머러스한)으로 안전한 대안 메시지도 제공해주세요.`;
 
-  // 1순위: GitHub Models API (Copilot SDK 호환 — PAT with models permission)
+  // 1순위: GitHub Models API (Copilot SDK 호환)
   if (githubToken) {
     try {
       return await callOpenAICompatible(

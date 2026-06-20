@@ -164,7 +164,7 @@ export default function SocialRiskAnalyzer() {
               </div>
             )}
 
-            {result && <AnalysisResult result={result} />}
+            {result && <AnalysisResult result={result} onSelectMessage={setMessageToSend} />}
           </div>
         </div>
       </div>

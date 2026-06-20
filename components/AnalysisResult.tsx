@@ -3,12 +3,14 @@
 import { AnalyzeResponse } from "@/types";
 import RiskMeter from "./RiskMeter";
 import CategoryCard from "./CategoryCard";
+import TonedSuggestions from "./TonedSuggestions";
 
 interface AnalysisResultProps {
   result: AnalyzeResponse;
+  onSelectMessage?: (message: string) => void;
 }
 
-export default function AnalysisResult({ result }: AnalysisResultProps) {
+export default function AnalysisResult({ result, onSelectMessage }: AnalysisResultProps) {
   return (
     <div className="space-y-6 animate-fadeIn">
       {/* 종합 위험도 */}
@@ -51,15 +53,13 @@ export default function AnalysisResult({ result }: AnalysisResultProps) {
         </div>
       )}
 
-      {/* 수정된 메시지 */}
-      {result.revisedMessage && (
-        <div className="bg-green-50 rounded-xl p-4 border border-green-200">
-          <h3 className="font-bold text-green-700 mb-2 flex items-center gap-2">
-            <span>✏️</span> 추천 수정 메시지
-          </h3>
-          <p className="text-green-800 text-sm italic leading-relaxed">
-            &ldquo;{result.revisedMessage}&rdquo;
-          </p>
+      {/* 3가지 톤별 안전 메시지 */}
+      {result.tonedSuggestions && result.tonedSuggestions.length > 0 && (
+        <div className="border-t border-gray-100 pt-4">
+          <TonedSuggestions
+            suggestions={result.tonedSuggestions}
+            onSelect={onSelectMessage ?? (() => {})}
+          />
         </div>
       )}
     </div>
