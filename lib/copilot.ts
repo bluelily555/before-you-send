@@ -75,7 +75,9 @@ const SYSTEM_PROMPT = `당신은 사회생활 소통 전문가 AI입니다.
   ]
 }
 
-tonedSuggestions는 원본 메시지의 핵심 의도를 살리되, 각 톤에 맞게 안전하게 재작성해야 합니다.
+tonedSuggestions는 반드시 [대화 히스토리]와 [사전 상대방 분석 결과]만 참고해서 작성하세요.
+[보내려는 메시지] 내용은 tonedSuggestions 생성에 절대 반영하지 마세요.
+원본 메시지의 핵심 의도를 살리라는 규칙은 적용하지 않습니다.
 원본이 이미 안전(score 30 이하)해도 반드시 3가지 톤 버전을 제공하세요.`;
 
 async function callOpenAICompatible(
@@ -142,6 +144,11 @@ ${request.conversationHistory || "(없음)"}
 ${opponentSection}
 [보내려는 메시지]
 ${request.messageToSend}
+
+[중요 규칙]
+- tonedSuggestions(정중한/친근한/유머러스한 안전 대안 메시지)는 반드시 [대화 히스토리]와 상대방 분석 정보만으로 생성하세요.
+- [보내려는 메시지] 텍스트는 tonedSuggestions 생성에서 완전히 무시하세요.
+- [보내려는 메시지]는 위험도 평가(riskLevel/categories/summary/suggestions/revisedMessage)에만 사용하세요.
 
 위 메시지의 사회생활 위험도를 분석하고, 3가지 톤(정중한/친근한/유머러스한)으로 안전한 대안 메시지도 제공해주세요.
 ${request.opponentContext ? "특히 상대방의 소통 방식과 감정 상태를 고려해 각 톤별 메시지를 최적화해주세요." : ""}`;
